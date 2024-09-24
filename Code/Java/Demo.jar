@@ -1,0 +1,55 @@
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.security.SecureRandom;
+import java.util.Base64;
+import javax.imageio.ImageIO;
+
+public class ACaptcha {
+    private static SecureRandom random = new SecureRandom();
+
+    public static String generateCaptcha(int width, int height) throws Exception {
+        // Generate a random code
+        String code = generateRandomCode(5);
+
+        // Create a new image
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        // Draw the code on the image
+        drawString(image, code, 10, 10, java.awt.Color.BLACK);
+
+        // Add some noise to the image
+        for (int i = 0; i < 10; i++) {
+            int x1 = random.nextInt(width);
+            int y1 = random.nextInt(height);
+            int x2 = random.nextInt(width);
+            int y2 = random.nextInt(height);
+            drawLine(image, x1, y1, x2, y2, java.awt.Color.BLACK);
+        }
+
+        // Encode the image to a base64 string
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", bos);
+        return Base64.getEncoder().encodeToString(bos.toByteArray());
+    }
+
+    private static String generateRandomCode(int length) {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return code.toString();
+    }
+
+    private static void drawString(BufferedImage image, String text, int x, int y, java.awt.Color color) {
+        java.awt.Graphics graphics = image.getGraphics();
+        graphics.setColor(color);
+        graphics.drawString(text, x, y);
+    }
+
+    private static void drawLine(BufferedImage image, int x1, int y1, int x2, int y2, java.awt.Color color) {
+        java.awt.Graphics graphics = image.getGraphics();
+        graphics.setColor(color);
+        graphics.drawLine(x1, y1, x2, y2);
+    }
+}
